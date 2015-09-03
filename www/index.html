@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="lib/nz-tour/dist/nz-tour.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/ionic.tour.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <script src="lib/nz-tour/dist/nz-tour.js"></script>
+
+    <script src="js/ionic.tour.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="js/app.js"></script>
+  </head>
+  <body ng-app="starter">
+
+    <ion-pane ng-controller="MainCtrl">
+
+      <ion-header-bar class="bar-stable">
+        <h1 tour-step class="title button-1">Ionic Tour</h1>
+      </ion-header-bar>
+
+      <ion-content>
+        <button class="button button-small button-5" ng-click="startTour()">
+          Start
+        </button>
+        <div class="button-bar padding">
+          <a class="button button-2" ng-click="tour.start()">First</a>
+          <a tour-step class="button button-3">Second</a>
+          <a tour-step class="button button-4">Third</a>
+        </div>
+
+      </ion-content>
+
+    </ion-pane>
+
+  </body>
+</html>

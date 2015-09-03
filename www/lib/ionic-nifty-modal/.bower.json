@@ -1,0 +1,32 @@
+{
+  "name": "ionic-nifty-modal",
+  "homepage": "https://github.com/loringdodge/ionic-nifty-modal",
+  "authors": [
+    "Loring Dodge <loringdodge@gmail.com>"
+  ],
+  "description": "Modal animation classes for the Ionic Framework",
+  "main": [
+    "nifty.modal.css"
+  ],
+  "keywords": [
+    "mobile",
+    "html5",
+    "ionic",
+    "cordova",
+    "phonegap",
+    "angularjs",
+    "angular"
+  ],
+  "license": "MIT",
+  "private": false,
+  "_release": "d4aeeb4dc4",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "d4aeeb4dc4105da6254b5b73ceb397efc8324cae"
+  },
+  "_source": "git://github.com/loringdodge/ionic-nifty-modal.git",
+  "_target": "*",
+  "_originalSource": "ionic-nifty-modal",
+  "_direct": true
+}

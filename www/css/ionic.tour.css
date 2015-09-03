@@ -1,0 +1,32 @@
+/* DEMO */
+.custom-tip {
+  position: absolute;
+  top: calc(50% - 75px);
+  left: 15%;
+  height: 150px;
+  width: 70%;
+  background-color: #FFF;
+  border-radius: 2px;
+  box-shadow: 2px 2px 15px rgba(0,0,0,0.7);
+}
+
+
+/* CORE */
+.tourtip {
+  display: block;
+  position: absolute;
+  top -webkit-transform: translate3d(0, 100%, 0);
+  transform: translate3d(0, 100%, 0);
+  z-index: 10;
+  overflow: hidden;
+  height:100%;
+  width: 100%;
+  background-color: rgba(0,0,0,0.3);}
+
+.slide-in {
+  -webkit-transform: translate3d(0, 0%, 0);
+  transform: translate3d(0, 0%, 0); }
+
+.slide-in.ng-enter, .slide-in > .ng-enter {
+  -webkit-transition: all cubic-bezier(0.1, 0.7, 0.1, 1) 400ms;
+  transition: all cubic-bezier(0.1, 0.7, 0.1, 1) 400ms; }

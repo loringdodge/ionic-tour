@@ -10,6 +10,20 @@
   box-shadow: 2px 2px 15px rgba(0,0,0,0.7);
 }
 
+.custom-tip:after {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(136, 183, 213, 0);
+  border-left-color: #FFF;
+  border-width: 15px;
+  margin-top: -15px;
+}
 
 /* CORE */
 .tourtip {

@@ -1,9 +1,20 @@
 (function(ionic) {
 
   angular.module('ionic.tour', [])
-    .factory('$ionicTour', function($rootScope, $compile, $timeout, $q, $ionicTemplateLoader, $ionicBody) {
+    .factory('$ionicTour', function($rootScope, $compile, $timeout, $q, $ionicTemplateLoader, $ionicBody, $ionicPosition) {
 
         var steps = [];
+
+        var getPosition = function(oldVal, newVal) {
+          if(oldVal <= newVal) {
+            return function(v) {
+              return oldVal + (newVal * v);
+            }
+          }
+          return function(v) {
+            return oldVal - (newVal * v);
+          }
+        };
 
         var TourView = ionic.views.View.inherit({
 
@@ -24,30 +35,85 @@
               tourtipEl.addClass('slide-in ng-enter active')
             });
 
-          },
+            // self.next(++self.current);
 
-          stop: function() {
-            console.log('stop');
-          },
-
-          pause: function() {
-            console.log('pause');
           },
 
           next: function() {
             console.log('next');
+            var self = this;
+            if((self.current + 1) > self.steps.length) {
+              return;
+            }
+            self.goToStep(self.current);
+            self.current++;
           },
 
           previous: function() {
             console.log('previous');
+            var self = this;
+            if((self.current - 1) < 0) {
+              return;
+            }
+            self.goToStep(--self.current);
           },
 
-          finish: function() {
-            console.log('finish');
+          finish: function(options) {
+            console.log('finish', options);
+            var self = this;
+
+            options = options || { destroy: true };
+
+            self.scope.$parent && self.scope.$parent.$broadcast('tourRemoved');
+
+            if(options.destroy) {
+              self.scope.$destroy();
+            }
+
+            self.$el.remove();
+
           },
 
           goToStep: function(index) {
             console.log('goToStep', index);
+            var self = this;
+            var i = self.current;
+
+            var top = getPosition(self.position.top, 0);
+            var left = getPosition(self.position.left, 0);
+
+            var deferred = $q.defer();
+
+            var animation = collide.animation({
+              duration: 800,
+              percent: 0,
+              reverse: false
+            })
+
+            .easing({
+              type: 'spring',
+              frequency: 5,
+              friction: 250,
+              initialForce: false
+            })
+
+            .on('start', function() {
+              self.steps[i].onStart();
+            })
+
+            .on('step', function(v) {
+              // self.steps[i].onTransition(v);
+              self.el.transform = self.el.webkitTransform = 'translate3d(' + left(v) + ',' + top(v) +' ,0)';
+            })
+
+            .on('complete', function() {
+              // self.position.top = top;
+              // self.position.left = left;
+              self.steps[i].onEnd();
+              deferred.resolve();
+            })
+            .start();
+
           }
 
         });
@@ -69,6 +135,15 @@
 
           var element = $compile('<div class="ion-tourtip">' + templateString + '</div>')(scope);
 
+          angular.forEach(steps, function(element){
+            console.log(element)
+            element['position'] = $ionicPosition.offset(element);
+          });
+
+          options.steps = steps;
+          options.current = 0;
+          options.position = {top: 0, left: 0};
+          options.tour = tour;
           options.$el = element;
           options.el = element[0];
           options.tourtipEl = options.el.querySelector('.tourtip');
@@ -77,9 +152,11 @@
 
           var tour = new TourView(options);
 
-          console.log(steps);
-
           tour.scope = scope;
+
+          if (!options.scope) {
+            scope[ options.tour ] = tour;
+          }
 
           deferred.resolve(tour);
 
@@ -113,12 +190,35 @@
 
     })
 
-    .directive('tourStep', function($ionicTour) {
+    .directive('tourStep', function($timeout, $ionicTour) {
 
       return {
         restrict: 'A',
-        link: function(scope, element, attribute) {
-          $ionicTour.registerStep(element[0]);
+        scope: {
+          tourOnStart: '&',
+          tourOnEnd: '&',
+          tourOnTransition: '&'
+        },
+        link: function(scope, element, attrs) {
+          ionic.extend(element, {
+            step: attrs.tourStep,
+            onStart: function() {
+              $timeout(function() {
+                if(typeof scope.tourOnStart === 'function') scope.tourOnStart();
+              });
+            },
+            onEnd: function() {
+              $timeout(function() {
+                if(typeof scope.tourOnEnd === 'function') scope.tourOnEnd();
+              });
+            },
+            onTransition: function(ratio) {
+              $timeout(function() {
+                if(typeof scope.tourOnTransition === 'function') scope.tourOnTransition(ratio);
+              })
+            }
+          })
+          $ionicTour.registerStep(element);
         }
       }
 

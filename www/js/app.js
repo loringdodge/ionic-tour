@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('starter', ['ionic', 'nzTour', 'ionic.tour'])
+angular.module('starter', ['ionic', 'ionic.tour'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -18,7 +18,7 @@ angular.module('starter', ['ionic', 'nzTour', 'ionic.tour'])
   });
 })
 
-.controller('MainCtrl', function($scope, $ionicTour, nzTour) {
+.controller('MainCtrl', function($scope, $ionicTour) {
 
   $scope.items = [0,1,2,3,4,5];
 
@@ -66,6 +66,18 @@ angular.module('starter', ['ionic', 'nzTour', 'ionic.tour'])
 
   $scope.finish = function() {
     $scope.tour.finish();
+  }
+
+  $scope.onStart = function() {
+    console.log('onStart');
+  }
+
+  $scope.onEnd = function() {
+    console.log('onEnd');
+  }
+
+  $scope.onTransition = function(ratio) {
+    console.log('onTransition', ratio);
   }
 
 

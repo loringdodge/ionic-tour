@@ -32,17 +32,43 @@
     <ion-pane ng-controller="MainCtrl">
 
       <ion-header-bar class="bar-stable">
-        <h1 tour-step="3" tour-on-start="onStart()" tour-on-end="onEnd()" tour-on-transition="onTransition()" class="title button-1">Ionic Tour</h1>
+        <h1 class="title button-1">Ionic Tour</h1>
       </ion-header-bar>
 
       <ion-content>
-        <button class="button button-small button-5" ng-click="startTour()">
-          Start
-        </button>
+
         <div class="button-bar padding">
-          <a class="button button-2" ng-click="tour.start()">First</a>
-          <a tour-step="1" class="button button-3">Second</a>
-          <a tour-step="2" class="button button-4">Third</a>
+          <a class="button" ng-click="tour.start({autoplay: true})">Start</a>
+          <a class="button" ng-click="tour.stop()">Stop</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a class="button">*</a>
+          <a class="button">*</a>
+          <a tour-step="1" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">First</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="2" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">Second</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a class="button">*</a>
+          <a tour-step="3" class="button">Third</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="4" class="button">Fourth</a>
+          <a class="button">*</a>
+          <a class="button">*</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="5" class="button">Fifth</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="6" class="button">Sixth</a>
         </div>
 
       </ion-content>

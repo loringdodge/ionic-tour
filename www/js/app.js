@@ -65,20 +65,41 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
   $scope.finish = function() {
-    $scope.tour.finish();
+    $scope.tour.finish({
+      destroy: false
+    });
   }
 
-  $scope.onStart = function() {
-    console.log('onStart');
+  $scope.goToStep = function(index) {
+    $scope.tour.goToStep(index);
   }
 
-  $scope.onEnd = function() {
-    console.log('onEnd');
+  $scope.reset = function() {
+    console.log('reset');
+    $scope.tour.reset();
+  }
+
+  $scope.onStart = function(element, tourtip) {
+    console.log('onStart', element, tourtip);
+    element.style.backgroundColor = 'red';
+  }
+
+  $scope.onEnd = function(element, tourtip) {
+    console.log('onEnd', element, tourtip);
+  }
+
+  $scope.onLeave = function(element, tourtip) {
+    console.log('onLeave', element, tourtip);
+    element.style.backgroundColor = '#FFF';
   }
 
   $scope.onTransition = function(ratio) {
     console.log('onTransition', ratio);
   }
+
+  $scope.$on('tourFinished', function(){
+    console.log('tourFinished');
+  })
 
 
 })

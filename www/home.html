@@ -1,0 +1,53 @@
+<ion-view view-title="Ionic Tour">
+    <ion-pane>
+
+      <ion-content>
+
+        <div class="button-bar padding">
+          <a class="button" ng-click="tour.start({autoplay: true})">Start</a>
+          <a class="button" ng-click="tour.stop()">Stop</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a class="button"></a>
+          <a class="button"></a>
+          <a tour-step="1" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">1</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="2" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">2</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a class="button"></a>
+          <a tour-step="3" tour-on-start="onStart" tour-on-leave="onLeave" class="button">3</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="4" tour-on-start="onStart" tour-on-leave="onLeave" class="button">4</a>
+          <a class="button"></a>
+          <a class="button"></a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="5" tour-on-start="onStart" tour-on-leave="onLeave" class="button">5</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="6" tour-on-start="onStart" tour-on-leave="onLeave" class="button">6</a>
+        </div>
+
+        <div class="button-bar padding">
+          <a class="button"></a>
+          <a tour-step="7" tour-on-start="onStart" tour-on-leave="onLeave" class="button">7</a>
+          <a class="button"></a>
+        </div>
+
+        <div class="button-bar padding">
+          <a tour-step="8" tour-on-start="onStart" tour-on-leave="onLeave" class="button">8</a>
+        </div>
+
+      </ion-content>
+
+    </ion-pane>
+</ion-view>

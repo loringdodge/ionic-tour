@@ -1,7 +1,7 @@
 (function(ionic) {
 
   angular.module('ionic.tour', [])
-    .factory('$ionicTour', function($rootScope, $compile, $timeout, $window, $q, $ionicTemplateLoader, $ionicBody, $ionicPosition) {
+    .factory('$ionicTour', function($rootScope, $compile, $timeout, $window, $q, $ionicTemplateLoader, $ionicBody, $ionicPosition, $ionicScrollDelegate) {
 
         var steps = [];
 
@@ -20,8 +20,23 @@
           return Math.abs((oldVal - newVal)) / 0.5;
         };
 
-        var getOrientation = function(w, e, t) {
-
+        // Function from https://github.com/angular/angular.js/issues/2866
+        // Kudos to https://github.com/calummoore
+        var getStyle = function(element, name, value) {
+          var val;
+          //for old IE
+          if (typeof element.currentStyle === 'function'){
+              val = element.currentStyle[name];
+          }
+          //for modern browsers
+          else if (typeof window.getComputedStyle === 'function'){
+              val = element.ownerDocument.defaultView
+                  .getComputedStyle(element,null)[name];
+          }
+          else {
+              val = element.style[name];
+          }
+          return  (val === '') ? undefined : val;
         };
 
         var TourView = ionic.views.View.inherit({
@@ -37,14 +52,19 @@
 
             options = options || { autoplay: true };
 
-            var tourtipEl = angular.element(self.tourtipEl);
+            $ionicScrollDelegate.freezeScroll(true);
 
-            console.log(self.window);
+            $ionicBody.append(self.$tourtipEl);
 
-            $ionicBody.append(self.tourtipEl);
+            self.tooltip = $ionicPosition.offset(self.$tourtipEl);
+
+            self.arrow = {
+              color: getStyle(self.arrowEl, 'borderBottomColor'),
+              top: getStyle(self.arrowEl, 'top')
+            }
 
             $timeout(function() {
-              tourtipEl.addClass('slide-in ng-enter active')
+              self.$tourtipEl.addClass('slide-in ng-enter active')
             });
 
             if(!options.autoplay) return;
@@ -53,81 +73,88 @@
 
           },
 
-          stop: function() {
-            console.log('stop');
-          },
-
-          reset: function() {
+          goToStep: function(index, onLeave) {
+            console.log('goToStep', index);
             var self = this;
-            var i = self.current;
-
-            var element = self.steps[i];
-
-            i = 0;
 
             if(!self._isRunning) {
               self._isRunning = true;
 
-              self.steps[i].onLeave(element[0], self.tourtipEl);
+              onLeave();
 
-              self.goToStep(i)
+              self.animateStep(index)
                 .then(function(){
                   self._isRunning = false;
                 });
             }
+          },
+
+          reset: function() {
+            var self = this;
+            var i = self.index;
+
+            var stepEl = self.steps[i];
+            var tourtipEl = self.tourtipEl;
+
+            i = 0;
+
+            self.goToStep(i, function(){
+              stepEl.onLeave(stepEl[0], tourtipEl);
+            });
+
           },
 
           next: function() {
             console.log('next');
             var self = this;
-            var i = self.current;
+            var i = self.index;
 
-            var element = self.steps[i];
+            var stepEl = self.steps[i];
+            var tourtipEl = self.tourtipEl;
 
-            if((i + 1) >= self.steps.length) return undefined;
+            i++;
 
-            if(!self._isRunning) {
-              self._isRunning = true;
+            if(i >= self.steps.length) return undefined;
 
-              if(i > -1) self.steps[i].onLeave(element[0], self.tourtipEl);
+            self.goToStep(i, function(){
+              if((i-1) > -1) self.steps[i-1].onLeave(stepEl[0], tourtipEl);
+            });
 
-              self.goToStep(++i)
-                .then(function(){
-                  self._isRunning = false;
-                });
-            }
           },
 
           previous: function() {
             console.log('previous');
             var self = this;
-            var i = self.current;
+            var i = self.index;
 
-            var element = self.steps[i];
+            var stepEl = self.steps[i];
+            var tourtipEl = self.tourtipEl;
 
-            if((i - 1) < 0) return undefined;
+            i--;
 
-            if(!self._isRunning) {
-              self._isRunning = true;
+            if(i < 0) return undefined;
 
-              if(i < self.steps.length) self.steps[i].onLeave(element[0], self.tourtipEl);
+            self.goToStep(i, function(){
+              if((i+1) < self.steps.length) stepEl.onLeave(stepEl[0], tourtipEl);
+            });
 
-              self.goToStep(--i)
-                .then(function(){
-                  self._isRunning = false;
-                });
-            }
           },
 
           finish: function(options) {
             console.log('finish', options);
             var self = this;
-            var i = self.current;
+            var i = self.index;
+
+            var stepEl = self.steps[i];
+            var tourtipEl = self.tourtipEl;
 
             options = options || { destroy: true };
 
-            self.steps[i].onLeave(element[0], self.tourtipEl);
-            self.reset();
+            $ionicScrollDelegate.freezeScroll(false);
+
+            stepEl.onLeave(stepEl[0], tourtipEl);
+
+            self.index = -1;
 
             self.scope.$parent && self.scope.$parent.$broadcast('tourFinished');
 
@@ -135,31 +162,50 @@
               self.scope.$destroy();
             }
 
-            self.tourtipEl.remove();
+            tourtipEl.remove();
 
           },
 
-          goToStep: function(index) {
-            console.log('goToStep', index);
+          animateStep: function(index) {
+            console.log('animateStep', index);
             var self = this;
 
-            self.current = index;
-            var i = self.current;
+            self.index = index;
+            var i = self.index;
 
-            var element = self.steps[i];
+            var stepEl = self.steps[i],
+                tourtip = self.tooltip,
+                tourtipEl = self.tourtipEl,
+                windowEl = self.windowEl,
+                arrowEl = self.arrowEl,
+                scrollView = $ionicScrollDelegate.getScrollView(),
+                newTourtipTop = stepEl.position.top + stepEl.position.height + 20,
+                newArrowLeft = (stepEl.position.left + (stepEl.position.width / 2)) - (windowEl.width * 0.01),
+                scrollVal = 0;
 
-            var duration = getDuration(self.position.top, topHeight);
-            console.log(self.steps[i].position.left, self.steps[i].position.width)
-            var topHeight = self.steps[i].position.top + self.steps[i].position.height + 20;
-            var topWidth = (self.steps[i].position.left + (self.steps[i].position.width / 2)) - (self.window.width * 0.05);
+            if(typeof stepEl.scrollVal !== 'undefined') {
+              $ionicScrollDelegate.scrollBy(0, -stepEl.scrollVal, true);
+            }
 
-            console.log(self.steps[i].position.left + (self.steps[i].position.width / 2));
-            console.log(topWidth);
+            if(newTourtipTop > windowEl.height) {
+              scrollVal = Math.min(newTourtipTop - windowEl.height, scrollView.__maxScrollTop);
+              $ionicScrollDelegate.scrollBy(0, scrollVal, true);
+              self.steps[i-1].scrollVal = scrollVal;
+            }
 
-            var top = getPosition(self.position.top, topHeight);
-            var left = getPosition(self.position.left, topWidth);
+            if(newTourtipTop + tourtip.height > windowEl.height){
+              newTourtipTop = stepEl.position.top - tourtip.height - scrollVal - 20;
+              self.styleArrow('bottom');
+            } else {
+              self.styleArrow('top');
+            }
 
-            var arrowLeft = getPosition(self.position.left, topWidth);
+            var tourtipTop = getPosition(self.position.top, newTourtipTop);
+            var arrowLeft = getPosition(self.position.left, newArrowLeft);
+            var duration = getDuration(self.position.top, newTourtipTop);
+
+            self.position.top = newTourtipTop;
+            self.position.left = newArrowLeft;
 
             var deferred = $q.defer();
 
@@ -177,25 +223,42 @@
             })
 
             .on('start', function() {
-              self.steps[i].onStart(element[0], self.tourtipEl);
+              stepEl.onStart(stepEl[0], tourtipEl);
             })
 
             .on('step', function(v) {
-              self.steps[i].onTransition(v, element[0], self.tourtipEl);
-              self.tourtipEl.style.transform = self.tourtipEl.style.webkitTransform = 'translate3d(0px,' + top(v) +'px,0)';
-              self.arrowEl.style.transform = self.arrowEl.style.webkitTransform = 'translate3d(' + left(v) + 'px,0px,0)';
+              stepEl.onTransition(v, stepEl[0], tourtipEl);
+              tourtipEl.style.transform = tourtipEl.style.webkitTransform = 'translate3d(0,' + tourtipTop(v) +'px,0)';
+              arrowEl.style.transform = self.arrowEl.style.webkitTransform = 'translate3d(' + arrowLeft(v) + 'px,0,0)';
             })
 
             .on('complete', function() {
-              self.position.top = topHeight;
-              self.position.left = topWidth;
-              self.steps[i].onEnd(element[0], self.tourtipEl);
+              stepEl.onEnd(stepEl[0], tourtipEl);
               deferred.resolve();
             })
             .start();
 
             return deferred.promise;
 
+          },
+
+          styleArrow: function(orientation) {
+            var self = this;
+
+            var arrowEl = self.arrowEl;
+            var arrow = self.arrow;
+
+            if(orientation === 'top'){
+              arrowEl.style.top = arrow.top;
+              arrowEl.style.borderTopColor = 'transparent';
+              arrowEl.style.borderBottomColor = arrow.color;
+            } else if (orientation === 'bottom'){
+              arrowEl.style.top = '100%';
+              arrowEl.style.borderTopColor = arrow.color;
+              arrowEl.style.borderBottomColor = 'transparent';
+            } else if(orientation === 'none'){
+              arrowEl.style.display = 'none';
+            }
           },
 
           _isShown: false,
@@ -210,7 +273,9 @@
 
         });
 
-        var createTour = function(templateString, tour, options) {
+        var createTour = function(templateString, options) {
+
+          console.log(options)
 
           var scope = options.scope && options.scope.$new() || $rootScope.$new(true);
 
@@ -227,27 +292,36 @@
 
           var element = $compile('<div class="ion-tourtip">' + templateString + '</div>')(scope);
 
+          console.log(steps)
           steps.sort(function(a,b){
-            return a.step > b.step;
+            console.log(a.step, b.step);
+            return a.step - b.step;
           });
 
           angular.forEach(steps, function(element){
             var position = $ionicPosition.offset(element);
-            element.position = position;
+            console.log(element)
+            ionic.extend(element, {
+              position: position,
+              scrollVal: 0
+            });
           });
 
           options.steps = steps;
-          options.current = -1;
-          options.position = {top: 0, left: 0};
-          options.window = {height: $window.innerHeight, width: $window.innerWidth};
+          options.index = -1;
+          options.position = { top: 0, left: 0 };
           options.tour = tour;
+
+          options.windowEl = { height: $window.innerHeight, width: $window.innerWidth };
+
           options.$el = element;
           options.el = element[0];
+
           options.tourtipEl = options.el.querySelector('.custom-tip');
           options.$tourtipEl = angular.element(options.tourtipEl);
+
           options.arrowEl = options.tourtipEl.querySelector('.custom-tip-arrow');
           options.$arrowEl = angular.element(options.arrowEl);
-          options.tooltip = $ionicPosition.offset(options.$tourtipEl);
 
           var tour = new TourView(options);
 
@@ -269,18 +343,22 @@
          * @param {object}
          * @returns {promise}
          */
-        fromTemplateUrl: function(url, tour, options) {
-          if(!url) throw 'No url specified';
-          if(!tour) throw 'No tour specified';
+        fromTemplateUrl: function(url, options) {
+          if(!url) throw 'A template was not defined.';
+          if(!options) throw 'Options are not defined.';
 
           return $ionicTemplateLoader.load(url).then(function(templateString) {
-            var tour = createTour(templateString, tour, options);
+            var tour = createTour(templateString, options);
             return tour;
           })
         },
 
         registerStep: function(element) {
           steps.push(element);
+        },
+
+        getSteps: function(){
+          return steps;
         }
 
       }
@@ -291,37 +369,59 @@
 
       return {
         restrict: 'A',
+
         scope: {
           tourOnStart: '=',
           tourOnEnd: '=',
           tourOnTransition: '=',
+          tourOnEnter: '=',
           tourOnLeave: '='
         },
+
         link: function(scope, element, attrs) {
           ionic.extend(element, {
             step: attrs.tourStep,
             onStart: function(element, tourtip) {
-              $timeout(function() {
-                if(typeof scope.tourOnStart === 'function') scope.tourOnStart(element, tourtip);
-              });
+              if(typeof scope.tourOnStart === 'function') {
+                $timeout(function() {
+                  scope.tourOnStart(element, tourtip);
+                });
+              }
             },
             onEnd: function(element, tourtip) {
-              $timeout(function() {
-                if(typeof scope.tourOnEnd === 'function') scope.tourOnEnd(element, tourtip);
-              });
+              if(typeof scope.tourOnEnd === 'function') {
+                $timeout(function() {
+                  scope.tourOnEnd(element, tourtip);
+                });
+              }
             },
             onTransition: function(ratio, element, tourtip) {
-              $timeout(function() {
-                if(typeof scope.tourOnTransition === 'function') scope.tourOnTransition(ratio, element, tourtip);
-              })
+              if(typeof scope.tourOnTransition === 'function') {
+                $timeout(function() {
+                  scope.tourOnTransition(ratio, element, tourtip);
+                })
+              }
+            },
+            onEnter: function(element, tourtip) {
+              if(typeof scope.tourOnEnter === 'function') {
+                $timeout(function() {
+                  scope.tourOnEnter(element, tourtip);
+                })
+              }
             },
             onLeave: function(element, tourtip) {
-              $timeout(function() {
-                if(typeof scope.tourOnLeave === 'function') scope.tourOnLeave(element, tourtip);
-              })
+              if(typeof scope.tourOnLeave === 'function') {
+                $timeout(function() {
+                  scope.tourOnLeave(element, tourtip);
+                })
+              }
             }
           })
-          $ionicTour.registerStep(element);
+
+          var steps = $ionicTour.getSteps();
+          if(steps.indexOf(element === -1)) {
+            $ionicTour.registerStep(element);
+          }
         }
       }
 

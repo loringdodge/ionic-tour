@@ -6,7 +6,6 @@
     <title></title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
-    <link href="lib/nz-tour/dist/nz-tour.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/ionic.tour.css" rel="stylesheet">
 
@@ -27,53 +26,9 @@
     <!-- your app's js -->
     <script src="js/app.js"></script>
   </head>
-  <body ng-app="starter">
 
-    <ion-pane ng-controller="MainCtrl">
+    <body ng-app="starter" ng-controller="MainCtrl">
+      <ion-nav-view view-title="Ionic Tour"></ion-nav-view>
+    </body>
 
-      <ion-header-bar class="bar-stable">
-        <h1 class="title button-1">Ionic Tour</h1>
-      </ion-header-bar>
-
-      <ion-content>
-
-        <div class="button-bar padding">
-          <a class="button" ng-click="tour.start({autoplay: true})">Start</a>
-          <a class="button" ng-click="tour.stop()">Stop</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a class="button">*</a>
-          <a class="button">*</a>
-          <a tour-step="1" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">First</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a tour-step="2" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">Second</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a class="button">*</a>
-          <a tour-step="3" class="button">Third</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a tour-step="4" class="button">Fourth</a>
-          <a class="button">*</a>
-          <a class="button">*</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a tour-step="5" class="button">Fifth</a>
-        </div>
-
-        <div class="button-bar padding">
-          <a tour-step="6" class="button">Sixth</a>
-        </div>
-
-      </ion-content>
-
-    </ion-pane>
-
-  </body>
 </html>

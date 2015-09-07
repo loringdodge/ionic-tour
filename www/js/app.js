@@ -1,55 +1,30 @@
-// Ionic Starter App
-
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'ionic.tour'])
 
-.run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-    if(window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+.config(function($stateProvider, $urlRouterProvider) {
+  $stateProvider
+
+  .state('app', {
+    url: "/app",
+    abstract: true,
+    templateUrl: "side-menu.html"
+  })
+
+  .state('app.home', {
+    url: "/home",
+    views: {
+      'content': {
+        templateUrl: "home.html"
+      }
     }
-    if(window.StatusBar) {
-      StatusBar.styleDefault();
-    }
-  });
+  })
+
+  // if none of the above states are matched, use this as the fallback
+  $urlRouterProvider.otherwise('/app/home');
 })
 
-.controller('MainCtrl', function($scope, $ionicTour) {
+.controller('MainCtrl', function($scope, $ionicTour, $ionicSideMenuDelegate) {
 
-  $scope.items = [0,1,2,3,4,5];
-
-  // var tour = {
-  //   config: {},
-  //   steps: [{
-  //       target: '.button-1',
-  //       content: 'This is the first step!',
-  //   }, {
-  //       target: '.button-2',
-  //       content: 'Blah blah blah.',
-  //   }, {
-  //       target: '.button-3',
-  //       content: 'I guess this is a menu!',
-  //   }, {
-  //       target: '.button-4',
-  //       content: 'I guess this is a menu!',
-  //   }, {
-  //       target: '.button-5',
-  //       content: 'I guess this is a menu!',
-  //   }]
-  // };
-
-  // $scope.startTour = function() {
-  //   console.log('start');
-  //   nzTour.start(tour);
-  // }
-
-  var tour = {};
-
-  $ionicTour.fromTemplateUrl('tour-template.html', tour, {
+  $ionicTour.fromTemplateUrl('tour-template.html', {
     scope: $scope
   }).then(function(tour){
     console.log('tourLoaded');
@@ -75,31 +50,40 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
   $scope.reset = function() {
-    console.log('reset');
+    // console.log('reset');
     $scope.tour.reset();
   }
 
   $scope.onStart = function(element, tourtip) {
-    console.log('onStart', element, tourtip);
-    element.style.backgroundColor = 'red';
+    // console.log('onStart', element, tourtip);
+    angular.element(element).addClass('button-outline button-assertive')
+    // element.style.backgroundColor = 'red';
   }
 
   $scope.onEnd = function(element, tourtip) {
-    console.log('onEnd', element, tourtip);
+    // console.log('onEnd', element, tourtip);
   }
 
   $scope.onLeave = function(element, tourtip) {
     console.log('onLeave', element, tourtip);
-    element.style.backgroundColor = '#FFF';
+    angular.element(element).removeClass('button-outline button-assertive')
   }
 
   $scope.onTransition = function(ratio) {
-    console.log('onTransition', ratio);
+    // console.log('onTransition', ratio);
   }
 
   $scope.$on('tourFinished', function(){
-    console.log('tourFinished');
+    // console.log('tourFinished');
   })
+
+  $scope.openSideMenu = function(element, tourtip) {
+    $ionicSideMenuDelegate.toggleLeft(true);
+  }
+
+  $scope.closeSideMenu = function(element, tourtip) {
+    $ionicSideMenuDelegate.toggleLeft(false);
+  }
 
 
 })

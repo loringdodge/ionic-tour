@@ -1,0 +1,25 @@
+<ion-side-menus enable-menu-with-back-views="false">
+  <ion-side-menu-content>
+    <ion-nav-bar class="bar-stable">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
+        </button>
+      </ion-nav-buttons>
+    </ion-nav-bar>
+    <ion-nav-view name="content"></ion-nav-view>
+  </ion-side-menu-content>
+
+  <ion-side-menu side="left">
+    <ion-pane class="background-grey">
+
+      <div class="button-bar padding">
+        <a tour-step="9" tour-on-start="openSideMenu" class="button">9</a>
+      </div>
+
+      <div class="button-bar padding">
+        <a tour-step="10" tour-on-leave="closeSideMenu" class="button">10</a>
+      </div>
+
+    </ion-pane>
+  </ion-side-menu>
+</ion-side-menus>

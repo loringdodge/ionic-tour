@@ -5,10 +5,13 @@ var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
+var uglify = require('gulp-uglify');
+var ngAnnotate = require('gulp-ng-annotate');
 var sh = require('shelljs');
 
 var paths = {
-  sass: ['./scss/**/*.scss']
+  sass: ['./scss/**/*.scss'],
+  dist: ['./www/js/ionic.tour.js']
 };
 
 gulp.task('default', ['sass']);
@@ -27,8 +30,21 @@ gulp.task('sass', function(done) {
     .on('end', done);
 });
 
+gulp.task('dist', function(done) {
+  gulp.src(paths.dist)
+    .pipe(gulp.dest('.'))
+    .pipe(ngAnnotate())
+    .pipe(uglify())
+    .pipe(rename({ extname: '.min.js' }))
+    .pipe(gulp.dest('.'))
+    .on('end', function() {
+      done();
+    });
+});
+
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
+  gulp.watch(paths.dist, ['dist']);
 });
 
 gulp.task('install', ['git-check'], function() {

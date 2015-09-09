@@ -45,8 +45,8 @@ angular.module('starter', ['ionic', 'ionic.tour'])
     });
   }
 
-  $scope.goToStep = function(index) {
-    $scope.tour.goToStep(index);
+  $scope.step = function(index) {
+    $scope.tour.step(index);
   }
 
   $scope.reset = function() {
@@ -82,7 +82,9 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
   $scope.closeSideMenu = function(element, tourtip) {
-    $ionicSideMenuDelegate.toggleLeft(false);
+    if($scope.tour._orientation === 'previous') {
+      $ionicSideMenuDelegate.toggleLeft(false);
+    }
   }
 
 

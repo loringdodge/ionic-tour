@@ -9,12 +9,13 @@
   display: block;
   position: absolute;
   z-index: 10;
-  height: 150px;
+  height: auto;
   width: 98%;
   left: 1%;
   background-color: #FFF;
   border-radius: 2px;
   box-shadow: 2px 2px 15px rgba(0,0,0,0.7);
+  box-radius: border-box;
 }
 
 .custom-tip-arrow {

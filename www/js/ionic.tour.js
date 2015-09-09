@@ -84,29 +84,65 @@
            *    Default: does not automatically go to the first stepEl
            */
           start: function(options) {
-            console.log('start');
             var self = this;
 
             options = options || { autoplay: true };
 
             $ionicScrollDelegate.freezeScroll(true);
 
-            $ionicBody.append(self.$tourtipEl);
+            $ionicBody.append(self._$tourtipEl);
 
-            self.tooltip = $ionicPosition.offset(self.$tourtipEl);
+            self._tourtipOffset = $ionicPosition.offset(self._$tourtipEl);
 
-            self.arrow = {
-              color: getStyle(self.arrowEl, 'borderBottomColor'),
-              top: getStyle(self.arrowEl, 'top')
+            self._arrowStyles = {
+              color: getStyle(self._arrowEl, 'borderBottomColor'),
+              top: getStyle(self._arrowEl, 'top')
             }
 
             $timeout(function() {
-              self.$tourtipEl.addClass('slide-in ng-enter active')
+              self._$tourtipEl.addClass('slide-in ng-enter active')
             });
+
+            self.scope.$parent.$broadcast('tourStarted');
 
             if(!options.autoplay) return;
 
             self.next();
+
+          },
+
+          /**
+           * @ngdoc method
+           * @name ionicTour#finish
+           * @description Remove the tourtip from the DOM and destroy the scope
+           * @param {Object} options
+           *  - `{boolean=}` `scope` Whether the scope should be destroyed
+           *    Default: true
+           */
+          finish: function(options) {
+            var self = this;
+            var i = self._index;
+
+            var stepEl = self._steps[i];
+            var tourtipEl = self._tourtipEl;
+
+            options = options || { destroy: true };
+
+            $ionicScrollDelegate.freezeScroll(false);
+
+            self._orientation = 'next';
+
+            stepEl.onLeave(stepEl[0], tourtipEl);
+
+            self._index = -1;
+
+            self.scope.$parent && self.scope.$parent.$broadcast('tourFinished');
+
+            if(options.destroy) {
+              self.scope.$destroy();
+            }
+
+            tourtipEl.remove();
 
           },
 
@@ -118,16 +154,15 @@
            * @param {function} onLeave The callback to be invoked before leaving
            */
           goToStep: function(index, onLeave) {
-            console.log('goToStep', index);
             var self = this;
 
-            onLeave = onLeave || self.steps[index].onLeave;
+            onLeave = onLeave || self._steps[index].onLeave;
 
             if(!self._isRunning) {
               self._isRunning = true;
 
               self._isFirst = (index === 0);
-              self._isLast = (index === (self.steps.length - 1));
+              self._isLast = (index === (self._steps.length - 1));
 
               onLeave();
 
@@ -145,10 +180,10 @@
            */
           reset: function() {
             var self = this;
-            var i = self.index;
+            var i = self._index;
 
-            var stepEl = self.steps[i];
-            var tourtipEl = self.tourtipEl;
+            var stepEl = self._steps[i];
+            var tourtipEl = self._tourtipEl;
 
             self._orientation = 'next';
 
@@ -168,10 +203,10 @@
            */
           step: function(index) {
             var self = this;
-            var i = self.index;
+            var i = self._index;
 
-            var stepEl = self.steps[i];
-            var tourtipEl = self.tourtipEl;
+            var stepEl = self._steps[i];
+            var tourtipEl = self._tourtipEl;
 
             i = --index;
 
@@ -188,21 +223,20 @@
            * @description Change the index to the next step and trigger goToStep
            */
           next: function() {
-            console.log('next');
             var self = this;
-            var i = self.index;
+            var i = self._index;
 
-            var stepEl = self.steps[i];
-            var tourtipEl = self.tourtipEl;
+            var stepEl = self._steps[i];
+            var tourtipEl = self._tourtipEl;
 
             self._orientation = 'next';
 
             i++;
 
-            if(i >= self.steps.length) return undefined;
+            if(i >= self._steps.length) return undefined;
 
             self.goToStep(i, function(){
-              if((i-1) > -1) self.steps[i-1].onLeave(stepEl[0], tourtipEl);
+              if((i-1) > -1) self._steps[i-1].onLeave(stepEl[0], tourtipEl);
             });
 
           },
@@ -213,12 +247,11 @@
            * @description Change the index to the previous step and trigger goToStep
            */
           previous: function() {
-            console.log('previous');
             var self = this;
-            var i = self.index;
+            var i = self._index;
 
-            var stepEl = self.steps[i];
-            var tourtipEl = self.tourtipEl;
+            var stepEl = self._steps[i];
+            var tourtipEl = self._tourtipEl;
 
             self._orientation = 'previous';
 
@@ -227,44 +260,8 @@
             if(i < 0) return undefined;
 
             self.goToStep(i, function(){
-              if((i+1) < self.steps.length) stepEl.onLeave(stepEl[0], tourtipEl);
+              if((i+1) < self._steps.length) stepEl.onLeave(stepEl[0], tourtipEl);
             });
-
-          },
-
-          /**
-           * @ngdoc method
-           * @name ionicTour#finish
-           * @description Remove the tourtip from the DOM and destroy the scope
-           * @param {Object} options
-           *  - `{boolean=}` `scope` Whether the scope should be destroyed
-           *    Default: true
-           */
-          finish: function(options) {
-            console.log('finish', options);
-            var self = this;
-            var i = self.index;
-
-            var stepEl = self.steps[i];
-            var tourtipEl = self.tourtipEl;
-
-            options = options || { destroy: true };
-
-            $ionicScrollDelegate.freezeScroll(false);
-
-            self._orientation = 'next';
-
-            stepEl.onLeave(stepEl[0], tourtipEl);
-
-            self.index = -1;
-
-            self.scope.$parent && self.scope.$parent.$broadcast('tourFinished');
-
-            if(options.destroy) {
-              self.scope.$destroy();
-            }
-
-            tourtipEl.remove();
 
           },
 
@@ -275,45 +272,44 @@
            * @param {number} index The index of the step
            */
           animateStep: function(index) {
-            console.log('animateStep', index);
             var self = this;
 
-            self.index = index;
-            var i = self.index;
+            self._index = index;
+            var i = self._index;
 
-            var stepEl = self.steps[i],
-                tourtip = self.tooltip,
-                tourtipEl = self.tourtipEl,
-                windowEl = self.windowEl,
-                arrowEl = self.arrowEl,
+            var stepEl = self._steps[i],
+                tourtipEl = self._tourtipEl,
+                tourtipOffset = self._tourtipOffset,
+                windowOffset = self._windowOffset,
+                arrowEl = self._arrowEl,
                 scrollView = $ionicScrollDelegate.getScrollView(),
-                newTourtipTop = stepEl.position.top + stepEl.position.height + 20,
-                newArrowLeft = (stepEl.position.left + (stepEl.position.width / 2)) - (windowEl.width * 0.01),
+                newTourtipTop = stepEl.offset.top + stepEl.offset.height + 20,
+                newArrowLeft = (stepEl.offset.left + (stepEl.offset.width / 2)) - (windowOffset.width * 0.01),
                 scrollDiff = 0;
 
             if(typeof stepEl.scrollDiff !== 'undefined') {
               $ionicScrollDelegate.scrollBy(0, -stepEl.scrollDiff, true);
             }
 
-            if(newTourtipTop > windowEl.height) {
-              scrollDiff = Math.min(newTourtipTop - windowEl.height, scrollView.__maxScrollTop);
+            if(newTourtipTop > windowOffset.height) {
+              scrollDiff = Math.min(newTourtipTop - windowOffset.height, scrollView.__maxScrollTop);
               $ionicScrollDelegate.scrollBy(0, scrollDiff, true);
-              self.steps[i-1].scrollDiff = scrollDiff;
+              self._steps[i-1].scrollDiff = scrollDiff;
             }
 
-            if(newTourtipTop + tourtip.height > windowEl.height){
-              newTourtipTop = stepEl.position.top - tourtip.height - scrollDiff - 20;
+            if(newTourtipTop + tourtipOffset.height > windowOffset.height){
+              newTourtipTop = stepEl.offset.top - tourtipOffset.height - scrollDiff - 20;
               self.styleArrow('bottom');
             } else {
               self.styleArrow('top');
             }
 
-            var tourtipTop = getPosition(self.position.top, newTourtipTop);
-            var arrowLeft = getPosition(self.position.left, newArrowLeft);
-            var duration = getDuration(self.position.top, newTourtipTop);
+            var tourtipTop = getPosition(tourtipOffset.top, newTourtipTop);
+            var arrowLeft = getPosition(tourtipOffset.left, newArrowLeft);
+            var duration = getDuration(tourtipOffset.top, newTourtipTop);
 
-            self.position.top = newTourtipTop;
-            self.position.left = newArrowLeft;
+            tourtipOffset.top = newTourtipTop;
+            tourtipOffset.left = newArrowLeft;
 
             var deferred = $q.defer();
 
@@ -337,7 +333,7 @@
             .on('step', function(v) {
               stepEl.onTransition(v, stepEl[0], tourtipEl);
               tourtipEl.style.transform = tourtipEl.style.webkitTransform = 'translate3d(0,' + tourtipTop(v) +'px,0)';
-              arrowEl.style.transform = self.arrowEl.style.webkitTransform = 'translate3d(' + arrowLeft(v) + 'px,0,0)';
+              arrowEl.style.transform = self._arrowEl.style.webkitTransform = 'translate3d(' + arrowLeft(v) + 'px,0,0)';
             })
 
             .on('complete', function() {
@@ -361,8 +357,8 @@
 
             orientation = orientation || 'top';
 
-            var arrowEl = self.arrowEl;
-            var arrow = self.arrow;
+            var arrowEl = self._arrowEl;
+            var arrow = self._arrowStyles;
 
             if(orientation === 'top'){
               arrowEl.style.top = arrow.top;
@@ -403,11 +399,11 @@
             return !!this._isShown;
           },
 
-          _arrowColor: null,
           _arrowEl: null,
-          _arrowStyle: 'top',
-          _arrowTop: null,
-          _arrowLeft: null,
+          _$arrowEl: null,
+          _arrowStyles: {},
+          _el: null,
+          _$el: null,
           _index: -1,
           _isFirst: true,
           _isLast: false,
@@ -415,13 +411,11 @@
           _isShown: false,
           _orientation: 'next',
           _steps: [],
-          _scrollDiff: null,
+          _scrollDiff: 0,
           _tourtipEl: null,
-          _tourtipTop: null,
-          _tourtipHeight: null,
-          _tourtipWidth: null,
-          _windowHeight: null,
-          _windowWidth: null,
+          _$tourtipEl: null,
+          _tourtipOffset: {},
+          _windowOffset: {},
 
         });
 
@@ -447,28 +441,28 @@
           });
 
           angular.forEach(steps, function(element){
-            var position = $ionicPosition.offset(element);
+            var offset = $ionicPosition.offset(element);
             ionic.extend(element, {
-              position: position,
+              offset: offset,
               scrollDiff: 0
             });
           });
 
-          options.steps = steps;
-          options.index = -1;
-          options.position = { top: 0, left: 0 };
+          options._steps = steps;
+
+          options._windowOffset = { height: $window.innerHeight, width: $window.innerWidth };
+
+          options._$el = element;
+          options._el = element[0];
+
+          options._tourtipEl = options._el.querySelector('.custom-tip');
+          options._$tourtipEl = angular.element(options._tourtipEl);
+          options._tourtipOffset = { top: 0, left: 0 };
+
+          options._arrowEl = options._tourtipEl.querySelector('.custom-tip-arrow');
+          options._$arrowEl = angular.element(options._arrowEl);
+
           options.tour = tour;
-
-          options.windowEl = { height: $window.innerHeight, width: $window.innerWidth };
-
-          options.$el = element;
-          options.el = element[0];
-
-          options.tourtipEl = options.el.querySelector('.custom-tip');
-          options.$tourtipEl = angular.element(options.tourtipEl);
-
-          options.arrowEl = options.tourtipEl.querySelector('.custom-tip-arrow');
-          options.$arrowEl = angular.element(options.arrowEl);
 
           var tour = new TourView(options);
 

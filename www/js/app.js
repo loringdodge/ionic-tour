@@ -32,14 +32,17 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   });
 
   $scope.next = function() {
+    // console.log('next');
     $scope.tour.next();
   }
 
   $scope.previous = function() {
+    // console.log('previous');
     $scope.tour.previous();
   }
 
   $scope.finish = function() {
+    // console.log('finish');
     $scope.tour.finish({
       destroy: false
     });
@@ -57,7 +60,6 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   $scope.onStart = function(element, tourtip) {
     // console.log('onStart', element, tourtip);
     angular.element(element).addClass('button-outline button-assertive')
-    // element.style.backgroundColor = 'red';
   }
 
   $scope.onEnd = function(element, tourtip) {
@@ -65,7 +67,7 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
   $scope.onLeave = function(element, tourtip) {
-    console.log('onLeave', element, tourtip);
+    // console.log('onLeave', element, tourtip);
     angular.element(element).removeClass('button-outline button-assertive')
   }
 
@@ -75,6 +77,10 @@ angular.module('starter', ['ionic', 'ionic.tour'])
 
   $scope.$on('tourFinished', function(){
     // console.log('tourFinished');
+  })
+
+  $scope.$on('tourStarted', function(){
+    // console.log('tourStarted');
   })
 
   $scope.openSideMenu = function(element, tourtip) {

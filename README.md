@@ -1,140 +1,16 @@
 Ionic Tour
 ===================
 
-A demo of how to achieve a side menu similar to that of the OkCupid App.
-When the side menu is triggered, a ratio is returned via the `$ionicSideMenuDelegate.getOpenRatio()` provider method.
-This ratio is then by a callback which is passed to the the animate ratio directive through
-the `animate-ratio` ratio.
+This module allows devs to simulate a tour of their mobile app with the use of a tourtip that translates itself to whichever element is the next step on the tour.
+
+The tour is instantiated inside a parent controller and steps are defined using an angular directive. You simply need to add `tour-step="1"` as an attribute to an element. You may also specify callbacks that are invoked at different points of the step including before, during, and after the animation.
+
+The module was inspired by a similar tour called [nz-tour](https://github.com/nozzle/nzTour) created by [Tanner Linsley](https://github.com/tannerlinsley) and the codebase is modeled after the [$ionicModal](http://ionicframework.com/docs/api/service/$ionicModal/) module.
 
 [Demo](http://codepen.io/loringdodge/pen/epNNgg)
 
-## Usage
+[Blog Post]()
 
-In your sidemenu:
-```html
-<ion-view view-title="Ionic Tour">
-  <ion-pane>
-
-  <ion-content>
-
-    <div class="button-bar padding">
-      <a class="button" ng-click="tour.start({autoplay: true})">Start</a>
-    </div>
-
-    <div class="button-bar padding">
-      <a class="button"></a>
-      <a class="button"></a>
-      <a tour-step="1" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">1</a>
-    </div>
-
-    <div class="button-bar padding">
-      <a tour-step="2" tour-on-start="onStart" tour-on-end="onEnd" tour-on-transition="onTransition" tour-on-leave="onLeave" class="button">2</a>
-    </div>
-
-    <div class="button-bar padding">
-      <a class="button"></a>
-      <a tour-step="3" tour-on-start="onStart" tour-on-leave="onLeave" class="button">3</a>
-    </div>
-
-  </ion-content>
-
-  </ion-pane>
-</ion-view>
-```
-
-```html
-<div class="custom-tip">
-  <div class="custom-tip-arrow"></div>
-  <div class="button-bar">
-    <button class="button" ng-click="next()">Next</button>
-    <button class="button" ng-click="previous()">Previous</button>
-  </div>
-
-  <div class="button-bar">
-    <button class="button" ng-click="finish()">Finish</button>
-    <button class="button" ng-click="step(1)">goToStep 1</button>
-    <button class="button" ng-click="reset()">Reset</button>
-  </div>
-```
-
-In your parent controller:
-```js
-angular.module('starter', ['ionic', 'ionic.tour'])
-.controller('MainCtrl', function($scope, $ionicTour, $ionicSideMenuDelegate) {
-
-  $ionicTour.fromTemplateUrl('tour-template.html', {
-    scope: $scope
-  }).then(function(tour){
-    console.log('tourLoaded');
-    $scope.tour = tour;
-  });
-
-  $scope.next = function() {
-    // console.log('next');
-    $scope.tour.next();
-  }
-
-  $scope.previous = function() {
-    // console.log('previous');
-    $scope.tour.previous();
-  }
-
-  $scope.finish = function() {
-    // console.log('finish');
-    $scope.tour.finish({
-      destroy: false
-    });
-  }
-
-  $scope.step = function(index) {
-    $scope.tour.step(index);
-  }
-
-  $scope.reset = function() {
-    // console.log('reset');
-    $scope.tour.reset();
-  }
-
-  $scope.onStart = function(element, tourtip) {
-    // console.log('onStart', element, tourtip);
-    angular.element(element).addClass('button-outline button-assertive')
-  }
-
-  $scope.onEnd = function(element, tourtip) {
-    // console.log('onEnd', element, tourtip);
-  }
-
-  $scope.onLeave = function(element, tourtip) {
-    // console.log('onLeave', element, tourtip);
-    angular.element(element).removeClass('button-outline button-assertive')
-  }
-
-  $scope.onTransition = function(ratio) {
-    // console.log('onTransition', ratio);
-  }
-
-  $scope.$on('tourFinished', function(){
-    // console.log('tourFinished');
-  })
-
-  $scope.$on('tourStarted', function(){
-    // console.log('tourStarted');
-  })
-
-  $scope.openSideMenu = function(element, tourtip) {
-    $ionicSideMenuDelegate.toggleLeft(true);
-  }
-
-  $scope.closeSideMenu = function(element, tourtip) {
-    if($scope.tour._orientation === 'previous') {
-      $ionicSideMenuDelegate.toggleLeft(false);
-    }
-  }
-
-})
-```
-
----
 ## Documentation
 
 1.  `$ionicTour` Methods
@@ -145,125 +21,106 @@ angular.module('starter', ['ionic', 'ionic.tour'])
 ---
 ##### `$ionicTour` Methods
 
-**`fromTemplateUrl(url, options)`**
+**`fromTemplateUrl(url, options)`** - The module makes the assumption that the contents of the tourtip are retrived from an external template. In order to launch the module, the template must be loaded and a new tour object attached to the current scope via promise.
 
 *   @param {string} url The url where the tooltip template is located.
-*   @param {object} options Options to be passed {@link ionic.controller:ionicTour#initialize ionicTour#initialize} method.
+*   @param {object} options Options to be passed
 *   @returns {promise} A promise that will be resolved with an instance of
 *   an {@link ionic.controller:ionicModal} controller.
 
-```
+```language-javascript
   $ionicTour.fromTemplateUrl('tour-template.html', {
     scope: $scope
   }).then(function(tour){
-    console.log('tourLoaded');
     $scope.tour = tour;
   });
 ```
 ---
 ##### `$scope.tour` Methods
 
-**`start()`** - Appends the tourtip to the DOM
+**`start()`** - Appends the tourtip to the DOM and calculates positioning for all the step elements. Automatically animates to the first step unless specified otherwise.
 
 *   @param {object} options
 * @return {undefined}
 
-```
+```language-javascript
 $scope.start = function() {
-  $scope.tour.start();
+  $scope.tour.start({
+    autoplay: true
+  });
 }
 ```
 
-**`finish()`** - Remove the tourtip from the DOM and destroy the scope
+**`finish()`** - Removes the tourtip from the DOM and destroys the scope unless specified.
 
 *   @param {Object} options
 * @return {undefined}
 
-```
+```language-javascript
 $scope.finish = function() {
-  $scope.tour.finish();
+  $scope.tour.finish({
+    destroy: false
+  });
 }
 ```
 
-**`step(index)`** - Move the tourtip to a specific step
+**`step(index)`** - Move and animates the tourtip to the specified step.
 
 * @param {number} index The index of the step
 * @return {undefined}
 
-```
+```language-javascript
 $scope.step = function(index) {
   $scope.tour.step(index);
 }
 ```
 
-**`reset()`** - Resets the index to 1.
+**`reset()`** - Resets the index to 1 and animates the tourtip to the first step.
 
 * @return {undefined}
 
-```
+```language-javascript
 $scope.reset = function() {
   $scope.tour.reset();
 }
 ```
 
-**`next()`** - Change the index to the next step and trigger goToStep
+**`next()`** - Changes the index to the next step and and triggers the tourtip animation to the next step element. If there are no longer any steps, `tourAtEnd` is broadcasted...see listeners.
 
 * @return {undefined}
 
-```
+```language-javascript
 $scope.next = function() {
   $scope.tour.next();
 }
 ```
 
-**`previous()`** - Animate the tourtip to a specific index
+**`previous()`** - Changes the index to the previous step and and triggers the tourtip animation to the previous step element. If the index reaches 1 (beginning of steps), `tourAtStart` is broadcasted...see listeners.
 
 * @return {undefined}
 
-```
+```language-javascript
 $scope.previous = function() {
   $scope.tour.previous();
-}
-```
-
-**`isRunning()`** - Whether a step is in progress or running
-
-* @param {boolean}
-
-```
-$scope.doSomething = function() {
-  if($scope.tour.isRunning()){
-    // something
-  }
-}
-```
-
-**`isShown()`** - Whether the tooltip is shown
-
-* @return {undefined}
-
-```
-$scope.doSomething = function() {
-  if($scope.tour.isShown()){
-    // something
-  }
 }
 ```
 ---
 ##### Listeners
 
-**`tourStarted`** - Broadcasted when the $scope.tour.start() function is invoked
+Ionic Tour broadcasts two listeners at the successful completion of two events, when the tour has succesfully been started and finshed.
 
-```
-$scope.$on('tourStarted', function(){
+**`tourStarted`** - Broadcasted when there are no longer any steps at the beginning of the steps array. There is also a property available on the tour object that returns a boolean if the step is the first step `$scope.tour._isFirst`.
+
+```language-javascript
+$scope.$on('tourAtStart', function(){
   // something
 })
 ```
 
-**`tourFinished`** - Broadcasted when the $scope.tour.finish() function is invoked
+**`tourAtEnd`** - Broadcasted when there are no longer any steps at the end of the steps array. There is also a property available on the tour object that returns a boolean if the step is the last step `$scope.tour._isLast`.
 
-```
-$scope.$on('tourFinished', function(){
+```language-javascript
+$scope.$on('tourAtEnd', function(){
   // something
 })
 ```
@@ -271,93 +128,96 @@ $scope.$on('tourFinished', function(){
 
 ##### Directive Attributes
 
-**`tour-on-start(stepEl, tourtipEl)`** - Invoked before the tooltip animates to the step element
+###### Essential
+**`tour-step`** {=} - Accepts an integer. Identifies the element as the element to reference in a that particular step. Steps should start at 1 and increment by 1 for each additional step.
 
-*   @param {object} stepEl The element of the current step
-*   @param {object} tourtipEl The tooltip element
+```language-markup
+<div tour-step="1"></div>
+<div tour-step="2"></div>
+<div tour-step="3"></div>
+```
+
+###### Callbacks
+
+A set of 5 callbacks are available through directive attributes and are invoked at different times as the tourtip moves from one step to another. Each example offers a snippet on how to include the call as an example and also how to declare the callback (as well as parameters) in the controller. They are listed in order of invocation.
+
+**`tour-on-enter`** {=} - Invoked before the tooltip animates to the next step element.
+
+*   @param {object} `stepEl` The element of the current step
+*   @param {object} `tourtipEl` The tooltip element
 * @return {undefined}
 
-```
-<div tour-step="1" tour-on-start="onStart"></div>
-```
-
-```
-$scope.onStart = function(stepEl, tourtipEl) {
-  // do something
-}
-```
-
-**`tour-on-end()`** - Invoked after the tooltip fully animates to the step element
-
-*   @param {object} stepEl The element of the current step
-*   @param {object} tourtipEl The tooltip element
-* @return {undefined}
-
-```
-<div tour-step="1" tour-on-end="onEnd"></div>
-```
-
-```
-$scope.onEnd = function(stepEl, tourtipEl) {
-  // do something
-}
-```
-
-**`tour-on-transition`** - Invoked as the tooltip animates toward the step element
-
-*   @param {number} ratio Percentage of animation completion (0 to 1)
-*   @param {object} stepEl The element of the current step
-*   @param {object} tourtipEl The tooltip element
-* @return {undefined}
-
-```
-<div tour-step="1" tour-on-transition="onStart"></div>
-```
-
-```
-$scope.onTransition = function(ratio, stepEl, tourtipEl) {
-  // do something
-}
-```
-
-**`tour-on-enter`** - Invoked before the tooltip moves toward the step element
-
-*   @param {object} stepEl The element of the current step
-*   @param {object} tourtipEl The tooltip element
-* @return {undefined}
-
-```
+```language-markup
 <div tour-step="1" tour-on-enter="onEnter"></div>
 ```
 
-```
+```language-javascript
 $scope.onEnter = function(stepEl, tourtipEl) {
   // do something
 }
 ```
 
-**`tour-on-leave`** - Invoked before the tooltip moves away from the step element
+**`tour-on-start(stepEl, tourtipEl)`** {=} - Invoked directly before the tooltip animates to the step element.
 
-*   @param {object} stepEl The element of the current step
-*   @param {object} tourtipEl The tooltip element
+*   @param {object} `stepEl` The element of the current step
+*   @param {object} `tourtipEl` The tooltip element
 * @return {undefined}
 
-```
-<div tour-step="1" tour-on-leave="onLeave"></div>
+```language-markup
+<div tour-step="1" tour-on-start="onStart"></div>
 ```
 
-```
-$scope.onLeave = function(stepEl, tourtipEl) {
+```language-javascript
+$scope.onStart = function(stepEl, tourtipEl) {
   // do something
 }
 ```
 
+**`tour-on-transition`** {=} - Invoked repeatedly as the tooltip animates toward the next step element. The first parameter is `ratio` indicates the percentage progression of the animation.
 
+*   @param {number} `ratio` Percentage of animation completion (0 to 1)
+*   @param {object} `stepEl` The element of the current step
+*   @param {object} `tourtipEl` The tooltip element
+* @return {undefined}
 
+```language-markup
+<div tour-step="1" tour-on-transition="onStart"></div>
+```
 
+```language-javascript
+$scope.onTransition = function(ratio, stepEl, tourtipEl) {
+  // do something
+}
+```
 
+**`tour-on-end`** {=} - Invoked directly after the tooltip fully animates to the next step element.
 
+*   @param {object} `stepEl` The element of the current step
+*   @param {object} `tourtipEl` The tooltip element
+* @return {undefined}
 
+```language-markup
+<div tour-step="1" tour-on-end="onEnd"></div>
+```
 
+```language-javascript
+$scope.onEnd = function(stepEl, tourtipEl) {
+  // do something
+}
+```
 
+**`tour-on-leave`** {=} - Invoked on the element after animation but before the tourtip moves to the next step element.
 
+*   @param {object} `stepEl` The element of the current step
+*   @param {object} `tourtipEl` The tooltip element
+* @return {undefined}
+
+```language-markup
+<div tour-step="1" tour-on-leave="onLeave"></div>
+```
+
+```language-javascript
+$scope.onLeave = function(stepEl, tourtipEl) {
+  // do something
+}
+```

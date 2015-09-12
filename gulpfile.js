@@ -11,7 +11,8 @@ var sh = require('shelljs');
 
 var paths = {
   sass: ['./scss/**/*.scss'],
-  dist: ['./www/js/ionic.tour.js']
+  distJS: ['./www/js/ionic.tour.js'],
+  distCSS: ['./www/css/ionic.tour.css'],
 };
 
 gulp.task('default', ['sass']);
@@ -31,11 +32,19 @@ gulp.task('sass', function(done) {
 });
 
 gulp.task('dist', function(done) {
-  gulp.src(paths.dist)
+  gulp.src(paths.distJS)
     .pipe(gulp.dest('.'))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(rename({ extname: '.min.js' }))
+    .pipe(gulp.dest('.'))
+
+  gulp.src(paths.distCSS)
+    .pipe(gulp.dest('.'))
+    .pipe(minifyCss({
+      keepSpecialComments: 0
+    }))
+    .pipe(rename({ extname: '.min.css' }))
     .pipe(gulp.dest('.'))
     .on('end', function() {
       done();

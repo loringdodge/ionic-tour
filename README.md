@@ -152,7 +152,7 @@ angular.module('starter', ['ionic', 'ionic.tour'])
 *   @returns {promise} A promise that will be resolved with an instance of
 *   an {@link ionic.controller:ionicModal} controller.
 
-```language-javascript
+```
   $ionicTour.fromTemplateUrl('tour-template.html', {
     scope: $scope
   }).then(function(tour){
@@ -168,7 +168,7 @@ angular.module('starter', ['ionic', 'ionic.tour'])
 *   @param {object} options
 * @return {undefined}
 
-```language-javascript
+```
 $scope.start = function() {
   $scope.tour.start();
 }
@@ -179,7 +179,7 @@ $scope.start = function() {
 *   @param {Object} options
 * @return {undefined}
 
-```language-javascript
+```
 $scope.finish = function() {
   $scope.tour.finish();
 }
@@ -190,7 +190,7 @@ $scope.finish = function() {
 * @param {number} index The index of the step
 * @return {undefined}
 
-```language-javascript
+```
 $scope.step = function(index) {
   $scope.tour.step(index);
 }
@@ -200,7 +200,7 @@ $scope.step = function(index) {
 
 * @return {undefined}
 
-```language-javascript
+```
 $scope.reset = function() {
   $scope.tour.reset();
 }
@@ -210,7 +210,7 @@ $scope.reset = function() {
 
 * @return {undefined}
 
-```language-javascript
+```
 $scope.next = function() {
   $scope.tour.next();
 }
@@ -220,7 +220,7 @@ $scope.next = function() {
 
 * @return {undefined}
 
-```language-javascript
+```
 $scope.previous = function() {
   $scope.tour.previous();
 }
@@ -230,7 +230,7 @@ $scope.previous = function() {
 
 * @param {boolean}
 
-```language-javascript
+```
 $scope.doSomething = function() {
   if($scope.tour.isRunning()){
     // something
@@ -242,7 +242,7 @@ $scope.doSomething = function() {
 
 * @return {undefined}
 
-```language-javascript
+```
 $scope.doSomething = function() {
   if($scope.tour.isShown()){
     // something
@@ -254,7 +254,7 @@ $scope.doSomething = function() {
 
 **`tourStarted`** - Broadcasted when the $scope.tour.start() function is invoked
 
-```language-javascript
+```
 $scope.$on('tourStarted', function(){
   // something
 })
@@ -262,7 +262,7 @@ $scope.$on('tourStarted', function(){
 
 **`tourFinished`** - Broadcasted when the $scope.tour.finish() function is invoked
 
-```language-javascript
+```
 $scope.$on('tourFinished', function(){
   // something
 })
@@ -277,11 +277,11 @@ $scope.$on('tourFinished', function(){
 *   @param {object} tourtipEl The tooltip element
 * @return {undefined}
 
-```language-markup
+```
 <div tour-step="1" tour-on-start="onStart"></div>
 ```
 
-```language-javascript
+```
 $scope.onStart = function(stepEl, tourtipEl) {
   // do something
 }
@@ -293,11 +293,11 @@ $scope.onStart = function(stepEl, tourtipEl) {
 *   @param {object} tourtipEl The tooltip element
 * @return {undefined}
 
-```language-markup
+```
 <div tour-step="1" tour-on-end="onEnd"></div>
 ```
 
-```language-javascript
+```
 $scope.onEnd = function(stepEl, tourtipEl) {
   // do something
 }
@@ -310,11 +310,11 @@ $scope.onEnd = function(stepEl, tourtipEl) {
 *   @param {object} tourtipEl The tooltip element
 * @return {undefined}
 
-```language-markup
+```
 <div tour-step="1" tour-on-transition="onStart"></div>
 ```
 
-```language-javascript
+```
 $scope.onTransition = function(ratio, stepEl, tourtipEl) {
   // do something
 }
@@ -326,11 +326,11 @@ $scope.onTransition = function(ratio, stepEl, tourtipEl) {
 *   @param {object} tourtipEl The tooltip element
 * @return {undefined}
 
-```language-markup
+```
 <div tour-step="1" tour-on-enter="onEnter"></div>
 ```
 
-```language-javascript
+```
 $scope.onEnter = function(stepEl, tourtipEl) {
   // do something
 }
@@ -342,11 +342,11 @@ $scope.onEnter = function(stepEl, tourtipEl) {
 *   @param {object} tourtipEl The tooltip element
 * @return {undefined}
 
-```language-markup
+```
 <div tour-step="1" tour-on-leave="onLeave"></div>
 ```
 
-```language-javascript
+```
 $scope.onLeave = function(stepEl, tourtipEl) {
   // do something
 }

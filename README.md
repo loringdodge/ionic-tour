@@ -11,6 +11,12 @@ The module was inspired by a similar tour called [nz-tour](https://github.com/no
 
 [Blog Post]()
 
+## Install
+
+```
+$ bower install --save ionic-tour
+```
+
 ## Documentation
 
 1.  `$ionicTour` Methods

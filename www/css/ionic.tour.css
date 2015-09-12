@@ -3,7 +3,8 @@
   background-color: #F4F4F4;
 }
 
-.custom-tip {
+/* CORE */
+tourtip {
   display: block;
   position: absolute;
   z-index: 10;
@@ -16,10 +17,9 @@
   box-radius: border-box;
 }
 
-.custom-tip-arrow {
+tourtip-arrow {
   position: absolute;
   top: -29px;
-/*  left: 50%;*/
   z-index: 10;
   border: solid transparent;
   height: 0;
@@ -31,25 +31,3 @@
   border-width: 15px;
   margin-left: -15px;
 }
-
-
-/* CORE */
-.tourtip {
-  display: block;
-  position: absolute;
-  top -webkit-transform: translate3d(0, 100%, 0);
-  transform: translate3d(0, 100%, 0);
-  z-index: 10;
-  overflow: hidden;
-  height:100%;
-  width: 100%;
-/*  background-color: rgba(0,0,0,0.3);*/
-}
-
-.slide-in {
-  -webkit-transform: translate3d(0, 0%, 0);
-  transform: translate3d(0, 0%, 0); }
-
-.slide-in.ng-enter, .slide-in > .ng-enter {
-  -webkit-transition: all cubic-bezier(0.1, 0.7, 0.1, 1) 400ms;
-  transition: all cubic-bezier(0.1, 0.7, 0.1, 1) 400ms; }

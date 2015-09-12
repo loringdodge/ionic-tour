@@ -1,10 +1,30 @@
 {
-  "name": "HelloIonic",
-  "private": "true",
-  "devDependencies": {
-    "ionic": "driftyco/ionic-bower#1.0.1"
-  },
+  "name": "ionic-tour",
+  "version": "1.0.0",
+  "homepage": "https://github.com/loringdodge/ionic-tour",
+  "authors": [
+    "Loring Dodge <loringdodge@gmail.com>"
+  ],
+  "description": "A step-by-step tour module for Ionic",
+  "main": [
+    "ionic.tour.css",
+    "ionic.tour.min.css",
+    "ionic.tour.js",
+    "ionic.tour.min.js"
+  ],
+  "keywords": [
+    "mobile",
+    "html5",
+    "ionic",
+    "cordova",
+    "phonegap",
+    "angularjs",
+    "angular"
+  ],
+  "license": "MIT",
+  "private": false,
   "dependencies": {
     "collide": "1.0.0-beta.3",
+    "ionic": "driftyco/ionic-bower#master"
   }
 }

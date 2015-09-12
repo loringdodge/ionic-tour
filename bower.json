@@ -22,13 +22,9 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "collide": "1.0.0-beta.3",
+    "collide": "1.0.0-beta.3"
   },
   "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
+    "example"
   ]
 }

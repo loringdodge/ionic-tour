@@ -8,7 +8,7 @@
   "description": "A step-by-step tour module for Ionic",
   "main": [
     "ionic.tour.css",
-    "ionic.tour.js",
+    "ionic.tour.js"
   ],
   "keywords": [
     "mobile",

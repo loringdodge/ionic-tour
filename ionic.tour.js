@@ -99,11 +99,18 @@
               top: getStyle(self._arrowEl, 'top')
             }
 
+            for(var i = 0; i < steps.length; i++){
+              var offset = $ionicPosition.offset(steps[i]);
+              ionic.extend(steps[i], {
+                offset: offset,
+                scrollDiff: 0
+              });
+            }
+
             $timeout(function() {
-              self._$tourtipEl.addClass('slide-in ng-enter active')
+              self._$tourtipEl.addClass('slide-in-up ng-enter active')
             });
 
-            self.scope.$parent.$broadcast('tourStarted');
 
             if(!options.autoplay) return;
 
@@ -156,7 +163,10 @@
           goToStep: function(index, onLeave) {
             var self = this;
 
-            onLeave = onLeave || self._steps[index].onLeave;
+            var stepEl = self._steps[index];
+            var tourtipEl = self._tourtipEl;
+
+            onLeave = onLeave || stepEl.onLeave;
 
             if(!self._isRunning) {
               self._isRunning = true;
@@ -165,6 +175,7 @@
               self._isLast = (index === (self._steps.length - 1));
 
               onLeave();
+              stepEl.onEnter(stepEl, tourtipEl);
 
               self.animateStep(index)
                 .then(function(){
@@ -210,6 +221,16 @@
 
             i = --index;
 
+            if(i < 0) {
+              self.scope.$parent.$broadcast('tourAtStart');
+              return undefined;
+            }
+
+            if(i >= self._steps.length) {
+              self.scope.$parent.$broadcast('tourAtEnd');
+              return undefined;
+            }
+
             self._orientation = 'next';
 
             self.goToStep(i, function(){
@@ -233,7 +254,10 @@
 
             i++;
 
-            if(i >= self._steps.length) return undefined;
+            if(i >= self._steps.length) {
+              self.scope.$parent.$broadcast('tourAtEnd');
+              return undefined;
+            }
 
             self.goToStep(i, function(){
               if((i-1) > -1) self._steps[i-1].onLeave(stepEl[0], tourtipEl);
@@ -257,7 +281,10 @@
 
             i--;
 
-            if(i < 0) return undefined;
+            if(i < 0) {
+              self.scope.$parent.$broadcast('tourAtStart');
+              return undefined;
+            }
 
             self.goToStep(i, function(){
               if((i+1) < self._steps.length) stepEl.onLeave(stepEl[0], tourtipEl);
@@ -282,9 +309,10 @@
                 tourtipOffset = self._tourtipOffset,
                 windowOffset = self._windowOffset,
                 arrowEl = self._arrowEl,
+                arrowStyles = self._arrowStyles,
                 scrollView = $ionicScrollDelegate.getScrollView(),
                 newTourtipTop = stepEl.offset.top + stepEl.offset.height + 20,
-                newArrowLeft = (stepEl.offset.left + (stepEl.offset.width / 2)) - (windowOffset.width * 0.01),
+                newArrowLeft = (stepEl.offset.left + (stepEl.offset.width / 2)) - ((windowOffset.width - tourtipOffset.width) / 2),
                 scrollDiff = 0;
 
             if(typeof stepEl.scrollDiff !== 'undefined') {
@@ -440,14 +468,6 @@
             return a.step - b.step;
           });
 
-          angular.forEach(steps, function(element){
-            var offset = $ionicPosition.offset(element);
-            ionic.extend(element, {
-              offset: offset,
-              scrollDiff: 0
-            });
-          });
-
           options._steps = steps;
 
           options._windowOffset = { height: $window.innerHeight, width: $window.innerWidth };
@@ -455,11 +475,11 @@
           options._$el = element;
           options._el = element[0];
 
-          options._tourtipEl = options._el.querySelector('.custom-tip');
+          options._tourtipEl = options._el.querySelector('tourtip');
           options._$tourtipEl = angular.element(options._tourtipEl);
           options._tourtipOffset = { top: 0, left: 0 };
 
-          options._arrowEl = options._tourtipEl.querySelector('.custom-tip-arrow');
+          options._arrowEl = options._tourtipEl.querySelector('tourtip-arrow');
           options._$arrowEl = angular.element(options._arrowEl);
 
           options.tour = tour;
@@ -568,7 +588,7 @@
               if(typeof scope.tourOnTransition === 'function') {
                 $timeout(function() {
                   scope.tourOnTransition(ratio, stepEl, tourtipEl);
-                })
+                });
               }
             },
 
@@ -583,7 +603,7 @@
               if(typeof scope.tourOnEnter === 'function') {
                 $timeout(function() {
                   scope.tourOnEnter(stepEl, tourtipEl);
-                })
+                });
               }
             },
 
@@ -598,7 +618,7 @@
               if(typeof scope.tourOnLeave === 'function') {
                 $timeout(function() {
                   scope.tourOnLeave(stepEl, tourtipEl);
-                })
+                });
               }
             }
           })

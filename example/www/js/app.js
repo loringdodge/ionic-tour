@@ -91,4 +91,4 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
 
-})
+});

@@ -99,6 +99,10 @@
               top: getStyle(self._arrowEl, 'top')
             }
 
+            steps.sort(function(a,b){
+              return a.step - b.step;
+            });
+
             for(var i = 0; i < steps.length; i++){
               var offset = $ionicPosition.offset(steps[i]);
               ionic.extend(steps[i], {
@@ -313,7 +317,8 @@
                 scrollView = $ionicScrollDelegate.getScrollView(),
                 newTourtipTop = stepEl.offset.top + stepEl.offset.height + 20,
                 newArrowLeft = (stepEl.offset.left + (stepEl.offset.width / 2)) - ((windowOffset.width - tourtipOffset.width) / 2),
-                scrollDiff = 0;
+                scrollDiff = 0,
+                lowerPadding = 10;
 
             if(typeof stepEl.scrollDiff !== 'undefined') {
               $ionicScrollDelegate.scrollBy(0, -stepEl.scrollDiff, true);
@@ -323,9 +328,10 @@
               scrollDiff = Math.min(newTourtipTop - windowOffset.height, scrollView.__maxScrollTop);
               $ionicScrollDelegate.scrollBy(0, scrollDiff, true);
               self._steps[i-1].scrollDiff = scrollDiff;
+              self._steps[i+1].scrollDiff = scrollDiff;
             }
 
-            if(newTourtipTop + tourtipOffset.height > windowOffset.height){
+            if(newTourtipTop + tourtipOffset.height + lowerPadding > (windowOffset.height + lowerPadding)){
               newTourtipTop = stepEl.offset.top - tourtipOffset.height - scrollDiff - 20;
               self.styleArrow('bottom');
             } else {
@@ -463,10 +469,6 @@
           });
 
           var element = $compile('<div class="ion-tourtip">' + templateString + '</div>')(scope);
-
-          steps.sort(function(a,b){
-            return a.step - b.step;
-          });
 
           options._steps = steps;
 

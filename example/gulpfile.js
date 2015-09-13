@@ -33,19 +33,19 @@ gulp.task('sass', function(done) {
 
 gulp.task('dist', function(done) {
   gulp.src(paths.distJS)
-    .pipe(gulp.dest('.'))
+    .pipe(gulp.dest('../.'))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(rename({ extname: '.min.js' }))
-    .pipe(gulp.dest('.'))
+    .pipe(gulp.dest('../.'))
 
   gulp.src(paths.distCSS)
-    .pipe(gulp.dest('.'))
+    .pipe(gulp.dest('../.'))
     .pipe(minifyCss({
       keepSpecialComments: 0
     }))
     .pipe(rename({ extname: '.min.css' }))
-    .pipe(gulp.dest('.'))
+    .pipe(gulp.dest('../.'))
     .on('end', function() {
       done();
     });

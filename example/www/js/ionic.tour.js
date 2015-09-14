@@ -235,7 +235,9 @@
               return undefined;
             }
 
-            self._orientation = 'next';
+            self._orientation = 'step';
+
+            console.log(stepEl)
 
             self.goToStep(i, function(){
               stepEl.onLeave(stepEl[0], tourtipEl);

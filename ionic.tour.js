@@ -63,7 +63,6 @@
         var TourView = ionic.views.View.inherit({
 
           /**
-           * @ngdoc method
            * @name ionicTour#initialize
            * @description Creates a new modal controller instance.
            * @param {object} opts an object with the following properties
@@ -76,7 +75,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#start
            * @description Appends the tourtip to the DOM
            * @param {object} options
@@ -92,6 +90,8 @@
 
             $ionicBody.append(self._$tourtipEl);
 
+            self._windowOffset = { height: $window.innerHeight, width: $window.innerWidth };
+
             self._tourtipOffset = $ionicPosition.offset(self._$tourtipEl);
 
             self._arrowStyles = {
@@ -99,18 +99,13 @@
               top: getStyle(self._arrowEl, 'top')
             }
 
-            for(var i = 0; i < steps.length; i++){
-              var offset = $ionicPosition.offset(steps[i]);
-              ionic.extend(steps[i], {
-                offset: offset,
-                scrollDiff: 0
-              });
-            }
+            self.sort();
 
             $timeout(function() {
               self._$tourtipEl.addClass('slide-in-up ng-enter active')
             });
 
+            ionic.on('resize', self.resize.bind(self), window);
 
             if(!options.autoplay) return;
 
@@ -119,7 +114,32 @@
           },
 
           /**
-           * @ngdoc method
+           * @name ionicTour#resize
+           * @description Resizes the tourtip based on new window dimensions
+           */
+          resize: function() {
+            var self = this;
+
+            $timeout(function() {
+
+              self._windowOffset = { height: $window.innerHeight, width: $window.innerWidth };
+
+              for(var i = 0; i < self._steps.length; i++){
+                var offset = $ionicPosition.offset(self._steps[i]);
+                ionic.extend(self._steps[i], {
+                  offset: offset
+                });
+              }
+
+              self._tourtipOffset = $ionicPosition.offset(self._$tourtipEl);
+
+              self.goToStep(self._index);
+
+            }, 500);
+
+          },
+
+          /**
            * @name ionicTour#finish
            * @description Remove the tourtip from the DOM and destroy the scope
            * @param {Object} options
@@ -154,7 +174,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#goToStep
            * @description Triggers the tourtip animation if not currently running
            * @param {number} index The index of the step
@@ -185,7 +204,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#reset
            * @description Resets the index to 1. Same as goToStep(1)
            */
@@ -207,7 +225,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#step
            * @description Move the tourtip to a specific step
            * @param {number} index The index of the step
@@ -231,7 +248,7 @@
               return undefined;
             }
 
-            self._orientation = 'next';
+            self._orientation = 'step';
 
             self.goToStep(i, function(){
               stepEl.onLeave(stepEl[0], tourtipEl);
@@ -239,7 +256,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#next
            * @description Change the index to the next step and trigger goToStep
            */
@@ -266,7 +282,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#previous
            * @description Change the index to the previous step and trigger goToStep
            */
@@ -293,7 +308,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name ionicTour#animateStep
            * @description Animate the tourtip to a specific index
            * @param {number} index The index of the step
@@ -313,7 +327,8 @@
                 scrollView = $ionicScrollDelegate.getScrollView(),
                 newTourtipTop = stepEl.offset.top + stepEl.offset.height + 20,
                 newArrowLeft = (stepEl.offset.left + (stepEl.offset.width / 2)) - ((windowOffset.width - tourtipOffset.width) / 2),
-                scrollDiff = 0;
+                scrollDiff = 0,
+                lowerPadding = 10;
 
             if(typeof stepEl.scrollDiff !== 'undefined') {
               $ionicScrollDelegate.scrollBy(0, -stepEl.scrollDiff, true);
@@ -323,9 +338,10 @@
               scrollDiff = Math.min(newTourtipTop - windowOffset.height, scrollView.__maxScrollTop);
               $ionicScrollDelegate.scrollBy(0, scrollDiff, true);
               self._steps[i-1].scrollDiff = scrollDiff;
+              self._steps[i+1].scrollDiff = scrollDiff;
             }
 
-            if(newTourtipTop + tourtipOffset.height > windowOffset.height){
+            if(newTourtipTop + tourtipOffset.height + lowerPadding > (windowOffset.height + lowerPadding)){
               newTourtipTop = stepEl.offset.top - tourtipOffset.height - scrollDiff - 20;
               self.styleArrow('bottom');
             } else {
@@ -375,7 +391,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name $ionicTour#registerStep
            * @description Change the orientation of the tourtip arrow
            * @param {string} orientation Either 'top', 'bottom', or 'none'
@@ -408,7 +423,42 @@
           },
 
           /**
-           * @ngdoc method
+           * @name $ionicTour#sort
+           * @description Sorts the steps into sequential order
+           */
+          sort: function() {
+            var self = this;
+            var steps = self._steps;
+
+            steps.sort(function(a,b){
+              return a.step - b.step;
+            });
+
+          },
+
+          /**
+           * @name $ionicTour#removeStep
+           * @description Remove a step from the tour
+           * @param {number} index The step number to be removed
+           */
+          removeStep: function(index) {
+            var self = this;
+
+            index--;
+
+            var stepEl = self._steps[index];
+            var tourtipEl = self._tourtipEl;
+
+            if(index === self._index) {
+              var i = (index !== 0) ? index-1 : index+1;
+              self.goToStep(i, function() {
+                self._steps[index].onLeave(stepEl[0], tourtipEl);
+              });
+            }
+            self._steps.splice(index, 1);
+          },
+
+          /**
            * @name $ionicTour#isRunning
            * @description Whether a step is in progress or running
            * @param {boolean}
@@ -418,7 +468,6 @@
           },
 
           /**
-           * @ngdoc method
            * @name $ionicTour#isShown
            * @description Whether the tooltip is shown
            * @param {boolean}
@@ -464,13 +513,7 @@
 
           var element = $compile('<div class="ion-tourtip">' + templateString + '</div>')(scope);
 
-          steps.sort(function(a,b){
-            return a.step - b.step;
-          });
-
           options._steps = steps;
-
-          options._windowOffset = { height: $window.innerHeight, width: $window.innerWidth };
 
           options._$el = element;
           options._el = element[0];
@@ -498,7 +541,6 @@
 
       return {
         /**
-         * @ngdoc method
          * @name $ionicTour#fromTemplateUrl
          * @param {string} url The url where the tooltip template is located.
          * @param {object} options Options to be passed {@link ionic.controller:ionicTour#initialize ionicTour#initialize} method.
@@ -516,13 +558,19 @@
         },
 
         /**
-         * @ngdoc method
          * @name $ionicTour#registerStep
          * @description Registers an element (step) with the factory.
          * @param {object} element A jQLite object
          */
         registerStep: function(element) {
-          steps.push(element);
+          $timeout(function() {
+            var offset = $ionicPosition.offset(element);
+            ionic.extend(element, {
+              offset: offset,
+              scrollDiff: 0
+            });
+            steps.push(element);
+          });
         }
 
       }
@@ -547,7 +595,7 @@
             step: attrs.tourStep,
 
             /**
-             * @ngdoc method
+
              * @name tourStep#OnStart
              * @description Invoked before the tooltip animates to the step element
              * @param {object} stepEl The element of the current step
@@ -562,7 +610,7 @@
             },
 
             /**
-             * @ngdoc method
+
              * @name tourStep#onEnd
              * @description Invoked after the tooltip fully animates to the step element
              * @param {object} stepEl The element of the current step
@@ -577,7 +625,7 @@
             },
 
             /**
-             * @ngdoc method
+
              * @name tourStep#onTransition
              * @description Invoked as the tooltip animates toward the step element
              * @param {number} ratio Percentage of animation completion (0 to 1)
@@ -593,7 +641,7 @@
             },
 
             /**
-             * @ngdoc method
+
              * @name tourStep#onEnter
              * @description Invoked before the tooltip moves toward the step element
              * @param {object} stepEl The element of the current step
@@ -608,7 +656,7 @@
             },
 
             /**
-             * @ngdoc method
+
              * @name tourStep#onLeave
              * @description Invoked before the tooltip moves away from the step element
              * @param {object} stepEl The element of the current step

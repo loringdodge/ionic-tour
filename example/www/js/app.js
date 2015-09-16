@@ -22,7 +22,7 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   $urlRouterProvider.otherwise('/app/home');
 })
 
-.controller('MainCtrl', function($scope, $ionicTour, $ionicSideMenuDelegate) {
+.controller('MainCtrl', function($scope, $ionicTour, $ionicSideMenuDelegate, $compile) {
 
   $ionicTour.fromTemplateUrl('tour-template.html', {
     scope: $scope
@@ -50,6 +50,20 @@ angular.module('starter', ['ionic', 'ionic.tour'])
 
   $scope.reset = function() {
     $scope.tour.reset();
+  }
+
+  $scope.addStep = function() {
+    var template = '<div class="button-bar padding"><a tour-step="11" tour-on-start="onStart" tour-on-leave="onLeave" class="button">11</a></div>';
+    var el = $compile(template)($scope.tour.scope);
+
+    var body = document.querySelector('.scroll');
+    angular.element(body).append(el);
+
+    $scope.tour.sort();
+  }
+
+  $scope.removeStep = function(index) {
+    $scope.tour.removeStep(index);
   }
 
   $scope.onStart = function(element, tourtip) {

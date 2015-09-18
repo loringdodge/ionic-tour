@@ -25,7 +25,8 @@ $ bower install --save ionic-tour
 4.  Directive Attributes
 
 ---
-##### `$ionicTour` Methods
+#### `$ionicTour` Methods
+
 
 **`fromTemplateUrl(url, options)`** - The module makes the assumption that the contents of the tourtip are retrived from an external template. In order to launch the module, the template must be loaded and a new tour object attached to the current scope via promise.
 
@@ -41,8 +42,10 @@ $ bower install --save ionic-tour
     $scope.tour = tour;
   });
 ```
+
 ---
-##### `$scope.tour` Methods
+#### `$scope.tour` Methods
+
 
 **`start()`** - Appends the tourtip to the DOM and calculates positioning for all the step elements. Automatically animates to the first step unless specified otherwise.
 
@@ -110,8 +113,35 @@ $scope.previous = function() {
   $scope.tour.previous();
 }
 ```
+
+**`removeStep()`** - Removes a specified step from the tour. If the step being removed is the step the tourtip is currently positioned on, it will by default go to the previous element unless it is the first step, then the tourtip will go to the next element.
+
+*   @param {number} index The step number to be removed
+* @return {undefined}
+
+```language-javascript
+$scope.removeStep = function(index) {
+  $scope.tour.removeStep(index);
+}
+```
+
+**`sort()`** - Sorts the steps into sequential order. This is useful if you add a new step and it is not the the next in sequential order. Additionally, adding a step is as simple as compiling it and rendering it to the body.
+
+* @return {undefined}
+
+```language-javascript
+  $scope.addStep = function() {
+    var template = '<div class="button-bar padding"><a tour-step="11" tour-on-start="onStart" tour-on-leave="onLeave" class="button">11</a></div>';
+    var el = $compile(template)($scope.tour.scope);
+
+    var body = document.querySelector('.scroll');
+    angular.element(body).append(el);
+
+    $scope.tour.sort();
+  }
+```
 ---
-##### Listeners
+#### Listeners
 
 Ionic Tour broadcasts two listeners at the successful completion of two events, when the tour has succesfully been started and finshed.
 
@@ -132,9 +162,8 @@ $scope.$on('tourAtEnd', function(){
 ```
 ---
 
-##### Directive Attributes
+#### Directive Attributes
 
-###### Essential
 **`tour-step`** {=} - Accepts an integer. Identifies the element as the element to reference in a that particular step. Steps should start at 1 and increment by 1 for each additional step.
 
 ```language-markup
@@ -143,9 +172,9 @@ $scope.$on('tourAtEnd', function(){
 <div tour-step="3"></div>
 ```
 
-###### Callbacks
+##### Callbacks
 
-A set of 5 callbacks are available through directive attributes and are invoked at different times as the tourtip moves from one step to another. Each example offers a snippet on how to include the call as an example and also how to declare the callback (as well as parameters) in the controller. They are listed in order of invocation.
+A set of 5 callbacks are available through directive attributes and are invoked at different times as the tourtip moves from one step to another. Each example offers a snippet on how to include attribute in the markup and also how to declare the callback (as well as parameters) in the controller. They are listed in order of invocation.
 
 **`tour-on-enter`** {=} - Invoked before the tooltip animates to the next step element.
 
@@ -179,7 +208,7 @@ $scope.onStart = function(stepEl, tourtipEl) {
 }
 ```
 
-**`tour-on-transition`** {=} - Invoked repeatedly as the tooltip animates toward the next step element. The first parameter is `ratio` indicates the percentage progression of the animation.
+**`tour-on-transition`** {=} - Invoked repeatedly as the tooltip animates toward the next step element. The first parameter, `ratio`, indicates the percentage of progression of the animation.
 
 *   @param {number} `ratio` Percentage of animation completion (0 to 1)
 *   @param {object} `stepEl` The element of the current step

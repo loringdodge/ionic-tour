@@ -95,7 +95,6 @@ angular.module('starter', ['ionic', 'ionic.tour'])
   }
 
   $scope.closeSideMenuPrevious = function(element, tourtip) {
-    console.log('in')
     if($scope.tour._orientation !== 'next') {
       console.log('inside')
       $ionicSideMenuDelegate.toggleLeft(false);

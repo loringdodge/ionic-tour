@@ -455,6 +455,7 @@
                 self._steps[index].onLeave(stepEl[0], tourtipEl);
               });
             }
+
             self._steps.splice(index, 1);
           },
 
